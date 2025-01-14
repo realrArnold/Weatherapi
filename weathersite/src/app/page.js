@@ -54,7 +54,7 @@ export default function Home() {
   }, [selectedLocation]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-8 bg-gradient-to-b from-blue-500 to-blue-300">
+    <div className="relative flex flex-col items-center justify-center min-h-screen py-8  from-blue-500 to-blue-300 bg-clouds bg-cover bg-center">
       <h1 className="text-4xl font-bold text-white mb-8">
         Weather in {selectedLocation.name}
       </h1>
