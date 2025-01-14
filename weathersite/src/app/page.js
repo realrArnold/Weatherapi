@@ -15,12 +15,14 @@ const locations = [
   { name: "Madrid", latitude: 40.4165, longitude: -3.7026 },
 ];
 
+const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
 export default function Home() {
-  const client = new ApiClient(); // Initialize the ApiClient
+  const client = new ApiClient();
   const [selectedLocation, setSelectedLocation] = useState(locations[0]);
-  const [loading, setLoading] = useState(true); // State to track loading
-  const [error, setError] = useState(null); // State to track errors
-  const [weatherData, setWeatherData] = useState(null); // State to store weather data
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [weatherData, setWeatherData] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -30,8 +32,16 @@ export default function Home() {
         longitude: locations.find((loc) => loc.name === selectedLocation.name)
           .longitude,
       });
-      setWeatherData({ ...data, locationName: selectedLocation.name });
+
       console.log(data);
+
+      setWeatherData({
+        temperatureMax: data.daily.temperature_2m_max,
+        temperatureMin: data.daily.temperature_2m_min,
+        rainSum: data.daily.rain_sum,
+        snowfallSum: data.daily.snowfall_sum,
+        locationName: selectedLocation.name,
+      });
       setLoading(false);
     } catch (error) {
       setError(error);
@@ -72,28 +82,32 @@ export default function Home() {
       {error && <div className="text-red-500">{error}</div>}
 
       {weatherData && (
-        <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md text-center">
-          <h2 className="text-2xl font-bold text-blue-700 mb-4">
-            {weatherData.locationName}
-          </h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-gray-700">
-              <span className="font-bold">Temperature:</span>{" "}
-              {weatherData.hourly.temperature_80m[0]}°C
+        <div className="grid grid-cols-1 gap-4 w-full max-w-md">
+          {weatherData.temperatureMax.map((temp, index) => (
+            <div
+              key={index}
+              className="bg-white p-6 rounded-lg shadow-lg text-center"
+            >
+              <h2 className="text-2xl font-bold text-blue-700 mb-2">
+                {days[index % 7]}
+              </h2>
+              <div className="text-gray-700">
+                <span className="font-bold">Max Temp:</span> {temp}°C
+              </div>
+              <div className="text-gray-700">
+                <span className="font-bold">Min Temp:</span>{" "}
+                {weatherData.temperatureMin[index]}°C
+              </div>
+              <div className="text-gray-700">
+                <span className="font-bold">Rain:</span>{" "}
+                {weatherData.rainSum[index]} mm
+              </div>
+              <div className="text-gray-700">
+                <span className="font-bold">Snowfall:</span>{" "}
+                {weatherData.snowfallSum[index]} mm
+              </div>
             </div>
-            <div className="text-gray-700">
-              <span className="font-bold">Rain:</span>{" "}
-              {weatherData.hourly.rain[0]} mm
-            </div>
-            <div className="text-gray-700">
-              <span className="font-bold">Snowfall:</span>{" "}
-              {weatherData.hourly.snowfall[0]} mm
-            </div>
-            <div className="text-gray-700">
-              <span className="font-bold">Visibility:</span>{" "}
-              {weatherData.hourly.visibility[0]} m
-            </div>
-          </div>
+          ))}
         </div>
       )}
     </div>
