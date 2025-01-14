@@ -4,7 +4,7 @@ import { ApiClient } from "./client";
 
 const locations = [
   { name: "London", latitude: 51.5085, longitude: -0.1257 },
-  { name: "New York", latitude: 40.7128, longitude: -74.006 },
+  { name: "New York", latitude: 40.7143, longitude: -74.006 },
   { name: "Tokyo", latitude: 35.6895, longitude: 139.6917 },
 ];
 
@@ -18,8 +18,10 @@ export default function Home() {
   const fetchData = async () => {
     try {
       const data = await client.getWeather({
-        latitude: 51.5085,
-        longitude: -0.1257,
+        latitude: locations.find((loc) => loc.name === selectedLocation.name)
+          .latitude,
+        longitude: locations.find((loc) => loc.name === selectedLocation.name)
+          .longitude,
       });
       setWeatherData({ ...data, locationName: selectedLocation.name });
       console.log(data);
