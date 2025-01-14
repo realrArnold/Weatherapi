@@ -1,6 +1,6 @@
 import axios from "axios";
 const BASE_URL =
-  "https://api.open-meteo.com/v1/forecast?latitude=51.5085,35.6895&longitude=-0.1257,139.6917&hourly=apparent_temperature,precipitation_probability,precipitation,rain,showers,snowfall,snow_depth,visibility,wind_speed_80m,wind_direction_80m,temperature_80m&timezone=GMT";
+  "https://api.open-meteo.com/v1/forecast?latitude=51.5085,40.7143,35.6895,-33.8678,48.8534,30.0626,55.7522,39.9075,52.5244,40.4165&longitude=-0.1257,-74.006,139.6917,151.2073,2.3488,31.2497,37.6156,116.3972,13.4105,-3.7026&hourly=rain,showers,snowfall,visibility,temperature_80m";
 export class ApiClient {
   async responseStatusCheck(responseObject) {
     if (responseObject.status >= 200 && responseObject.status < 300) {
@@ -10,7 +10,9 @@ export class ApiClient {
   }
   async getRequest(params = {}) {
     try {
-      const response = await axios.get(`${BASE_URL}`, { params });
+      const response = await axios.get(
+        `https://api.open-meteo.com/v1/forecast?latitude=${params.latitude}&longitude=${params.longitude}&hourly=rain,showers,snowfall,visibility,temperature_80m&timezone=GMT`
+      );
       return this.responseStatusCheck(response);
     } catch (error) {
       console.log(error);
@@ -21,6 +23,6 @@ export class ApiClient {
     return this.getRequest("", { results: 10 });
   }
   async getWeather({ latitude, longitude }) {
-    return this.getRequest();
+    return this.getRequest({ latitude, longitude });
   }
 }
