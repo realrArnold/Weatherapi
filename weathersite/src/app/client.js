@@ -9,7 +9,7 @@ export class ApiClient {
   async getRequest(params = {}) {
     try {
       const response = await axios.get(
-        `https://api.open-meteo.com/v1/forecast?latitude=${params.latitude}&longitude=${params.longitude}&hourly=rain,showers,snowfall,visibility&daily=temperature_2m_max,temperature_2m_min,rain_sum,snowfall_sum&timezone=GMT`
+        `https://api.open-meteo.com/v1/forecast?latitude=${params.latitude}&longitude=${params.longitude}&hourly=rain,showers,snowfall,visibility&daily=weather_code,temperature_2m_max,temperature_2m_min,rain_sum,snowfall_sum&timezone=GMT`
       );
       return this.responseStatusCheck(response);
     } catch (error) {

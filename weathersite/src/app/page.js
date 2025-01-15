@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { ApiClient } from "./client";
+import WeatherIcons from "./components/weatherIcons"; // WeatherIcons Component
+import { weatherData as weatherInformation } from "@/app/data/weatherData";
 
 const locations = [
   { name: "London", latitude: 51.5085, longitude: -0.1257 },
@@ -23,23 +25,23 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [weatherData, setWeatherData] = useState(null);
+  const [isDaytime, setIsDaytime] = useState(true); // Toggle between day and night
 
   const fetchData = async () => {
     try {
       const data = await client.getWeather({
-        latitude: locations.find((loc) => loc.name === selectedLocation.name)
-          .latitude,
-        longitude: locations.find((loc) => loc.name === selectedLocation.name)
-          .longitude,
+        latitude: selectedLocation.latitude,
+        longitude: selectedLocation.longitude,
       });
 
-      console.log(data);
+      console.log("API Response:", data);
 
       setWeatherData({
         temperatureMax: data.daily.temperature_2m_max,
         temperatureMin: data.daily.temperature_2m_min,
         rainSum: data.daily.rain_sum,
         snowfallSum: data.daily.snowfall_sum,
+        weatherCodes: data.daily.weather_code, // Assuming weather codes are here
         locationName: selectedLocation.name,
       });
       setLoading(false);
@@ -54,7 +56,7 @@ export default function Home() {
   }, [selectedLocation]);
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen py-8  from-blue-500 to-blue-300 bg-clouds bg-cover bg-center">
+    <div className="relative flex flex-col items-center justify-center min-h-screen py-8 bg-clouds bg-cover bg-center from-blue-500 to-blue-300">
       <h1 className="text-4xl font-bold text-white mb-8">
         Weather in {selectedLocation.name}
       </h1>
@@ -82,16 +84,19 @@ export default function Home() {
       {error && <div className="text-red-500">{error}</div>}
 
       {weatherData && (
-        <div className="grid grid-cols-1 gap-4 w-full max-w-md">
+        <div className="grid grid-cols-1 gap-6 w-full max-w-lg">
           {weatherData.temperatureMax.map((temp, index) => (
             <div
               key={index}
               className="bg-white p-6 rounded-lg shadow-lg text-center"
             >
-              <h2 className="text-2xl font-bold text-blue-700 mb-2">
+              <h2 className="text-2xl font-bold text-blue-700 mb-4">
                 {days[index % 7]}
               </h2>
-              <div className="text-gray-700">
+
+              <WeatherIcons iconKey={weatherData.weatherCodes[index]} />
+
+              <div className="text-gray-700 mt-4">
                 <span className="font-bold">Max Temp:</span> {temp}°C
               </div>
               <div className="text-gray-700">
