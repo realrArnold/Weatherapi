@@ -2,8 +2,14 @@
 import { useState, useEffect } from "react";
 import { ApiClient } from "./client";
 import WeatherIcons from "./components/weatherIcons"; // WeatherIcons Component
-import { weatherData as weatherInformation } from "@/app/data/weatherData";
+import {
+  FaArrowUp,
+  FaArrowRight,
+  FaArrowDown,
+  FaArrowLeft,
+} from "react-icons/fa";
 
+// Define locations
 const locations = [
   { name: "London", latitude: 51.5085, longitude: -0.1257 },
   { name: "New York", latitude: 40.7143, longitude: -74.006 },
@@ -17,7 +23,80 @@ const locations = [
   { name: "Madrid", latitude: 40.4165, longitude: -3.7026 },
 ];
 
-const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+// Define wind direction icons
+const windDirectionIcons = {
+  North: <FaArrowDown />,
+  East: <FaArrowLeft />,
+  South: <FaArrowUp />,
+  West: <FaArrowRight />,
+};
+
+const getWindDirectionIcon = (windDirection) => {
+  if ((windDirection >= 0 && windDirection <= 45) || windDirection > 315) {
+    return windDirectionIcons["North"];
+  } else if (windDirection > 45 && windDirection <= 135) {
+    return windDirectionIcons["East"];
+  } else if (windDirection > 135 && windDirection <= 225) {
+    return windDirectionIcons["South"];
+  } else if (windDirection > 225 && windDirection <= 315) {
+    return windDirectionIcons["West"];
+  }
+};
+
+// Helper function to get the next 7 day labels
+const getNextSevenDayLabels = () => {
+  const today = new Date();
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const dayLabels = [];
+
+  for (let i = 0; i < 7; i++) {
+    const date = new Date();
+    date.setDate(today.getDate() + i); // Increment the date
+
+    if (i === 0) {
+      // Today
+      dayLabels.push("Today");
+    } else {
+      const dayName = dayNames[date.getDay()];
+      const dayDate = date.getDate();
+      const monthName = monthNames[date.getMonth()];
+      dayLabels.push(
+        `${dayName} ${dayDate}${getOrdinalSuffix(dayDate)} ${monthName}`
+      );
+    }
+  }
+
+  return dayLabels;
+};
+
+// Helper function to get the ordinal suffix for a date
+const getOrdinalSuffix = (day) => {
+  if (day > 3 && day < 21) return "th"; // 4th-20th
+  switch (day % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
+};
 
 export default function Home() {
   const client = new ApiClient();
@@ -25,7 +104,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [weatherData, setWeatherData] = useState(null);
-  const [isDaytime, setIsDaytime] = useState(true); // Toggle between day and night
+  const [dayLabels, setDayLabels] = useState(getNextSevenDayLabels()); // Get dynamic day labels
 
   const fetchData = async () => {
     try {
@@ -41,12 +120,13 @@ export default function Home() {
         temperatureMin: data.daily.temperature_2m_min,
         rainSum: data.daily.rain_sum,
         snowfallSum: data.daily.snowfall_sum,
-        weatherCodes: data.daily.weather_code, // Assuming weather codes are here
+        weatherCodes: data.daily.weather_code,
         locationName: selectedLocation.name,
+        windDirection: data.daily.wind_direction_10m_dominant,
       });
       setLoading(false);
     } catch (error) {
-      setError(error);
+      setError(error.message);
       setLoading(false);
     }
   };
@@ -91,7 +171,7 @@ export default function Home() {
               className="bg-white p-6 rounded-lg shadow-lg text-center"
             >
               <h2 className="text-2xl font-bold text-blue-700 mb-4">
-                {days[index % 7]}
+                {dayLabels[index]} {/* Use dynamic day labels */}
               </h2>
 
               <WeatherIcons iconKey={weatherData.weatherCodes[index]} />
@@ -110,6 +190,10 @@ export default function Home() {
               <div className="text-gray-700">
                 <span className="font-bold">Snowfall:</span>{" "}
                 {weatherData.snowfallSum[index]} mm
+              </div>
+              <div className="flex items-center justify-center text-gray-700 mt-2">
+                <span className="font-bold mr-2">Wind:</span>
+                {getWindDirectionIcon(weatherData.windDirection[index])}
               </div>
             </div>
           ))}
