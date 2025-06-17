@@ -32,48 +32,35 @@ const windDirectionIcons = {
 };
 
 const getWindDirectionIcon = (windDirection) => {
-  if ((windDirection >= 0 && windDirection <= 45) || windDirection > 315) {
-    return windDirectionIcons["North"];
-  } else if (windDirection > 45 && windDirection <= 135) {
-    return windDirectionIcons["East"];
-  } else if (windDirection > 135 && windDirection <= 225) {
-    return windDirectionIcons["South"];
-  } else if (windDirection > 225 && windDirection <= 315) {
-    return windDirectionIcons["West"];
+  const directions = [
+    { name: "North", min: 0, max: 45 },
+    { name: "East", min: 46, max: 135 },
+    { name: "South", min: 136, max: 225 },
+    { name: "West", min: 226, max: 315 },
+    { name: "North", min: 316, max: 360 },
+  ];
+  for (const dir of directions) {
+    if (windDirection >= dir.min && windDirection <= dir.max) {
+      return windDirectionIcons[dir.name];
+    }
   }
 };
 
 // Helper function to get the next 7 day labels
 const getNextSevenDayLabels = () => {
   const today = new Date();
-  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const monthNames = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
   const dayLabels = [];
 
   for (let i = 0; i < 7; i++) {
-    const date = new Date();
-    date.setDate(today.getDate() + i); // Increment the date
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
 
     if (i === 0) {
-      // Today
       dayLabels.push("Today");
     } else {
-      const dayName = dayNames[date.getDay()];
+      const dayName = date.toLocaleString("en-US", { weekday: "short" });
+      const monthName = date.toLocaleString("en-US", { month: "short" });
       const dayDate = date.getDate();
-      const monthName = monthNames[date.getMonth()];
       dayLabels.push(
         `${dayName} ${dayDate}${getOrdinalSuffix(dayDate)} ${monthName}`
       );
